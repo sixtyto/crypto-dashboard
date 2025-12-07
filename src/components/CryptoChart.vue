@@ -172,4 +172,10 @@ onUnmounted(() => {
   height: 400px;
   width: 100%;
 }
+
+@media (max-width: 640px) {
+  .chart-wrapper {
+    height: 250px;
+  }
+}
 </style>

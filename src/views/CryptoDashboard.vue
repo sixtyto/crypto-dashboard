@@ -132,4 +132,41 @@ select:focus {
   margin-top: 1rem;
   color: var(--color-accent-primary);
 }
+
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding: var(--spacing-sm);
+  }
+
+  .dashboard-card {
+    padding: var(--spacing-md);
+  }
+
+  .dashboard-header {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding-top: var(--spacing-lg); /* Make room for toggle if absolute, or just space */
+  }
+
+  .theme-toggle-wrapper {
+    /* Keep it in the top right corner visually */
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .dashboard-title {
+    font-size: 1.25rem;
+    margin-top: var(--spacing-sm);
+  }
+  
+  .dashboard-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .select-wrapper {
+    max-width: 100%;
+  }
+}
 </style>
