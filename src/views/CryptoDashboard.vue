@@ -5,7 +5,8 @@ import { useCoinHistory } from '../composables/useCoinHistory'
 import { useQueryParameter } from '../composables/useQueryParameter'
 
 const coin = useQueryParameter('coin', 'BTC')
-const { history, isFetching } = useCoinHistory(coin)
+const period = useQueryParameter('period', '7d')
+const { history, isFetching } = useCoinHistory(coin, period)
 </script>
 
 <template>
@@ -25,26 +26,52 @@ const { history, isFetching } = useCoinHistory(coin)
         </p>
       </header>
 
-      <div class="select-wrapper">
-        <select v-model="coin">
-          <option value="BTC">
-            Bitcoin (BTC)
-          </option>
+      <div class="selectors-wrapper">
+        <div class="select-wrapper">
+          <select v-model="coin">
+            <option value="BTC">
+              Bitcoin (BTC)
+            </option>
 
-          <option value="ETH">
-            Ethereum (ETH)
-          </option>
+            <option value="ETH">
+              Ethereum (ETH)
+            </option>
 
-          <option value="SOL">
-            Solana (SOL)
-          </option>
-        </select>
+            <option value="SOL">
+              Solana (SOL)
+            </option>
+          </select>
+        </div>
+
+        <div class="select-wrapper">
+          <select v-model="period">
+            <option value="24h">
+              24 Hours
+            </option>
+            <option value="7d">
+              7 Days
+            </option>
+            <option value="30d">
+              30 Days
+            </option>
+            <option value="3m">
+              3 Months
+            </option>
+            <option value="1y">
+              1 Year
+            </option>
+            <option value="3y">
+              3 Years
+            </option>
+          </select>
+        </div>
       </div>
 
       <CryptoChart
         v-if="history.length > 0"
         :coin-symbol="coin"
         :history="history"
+        :period="period"
       />
 
       <div v-if="isFetching" class="loading-indicator">
@@ -101,10 +128,17 @@ const { history, isFetching } = useCoinHistory(coin)
   background-clip: text;
 }
 
+.selectors-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin: 0 auto var(--spacing-lg);
+  max-width: 600px;
+}
+
 .select-wrapper {
   position: relative;
-  max-width: 300px;
-  margin: 0 auto var(--spacing-lg);
+  width: 200px;
 }
 
 select {
@@ -160,12 +194,18 @@ select:focus {
     font-size: 1.25rem;
     margin-top: var(--spacing-sm);
   }
-  
+
   .dashboard-subtitle {
     font-size: 0.8rem;
   }
 
+  .selectors-wrapper {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
   .select-wrapper {
+    width: 100%;
     max-width: 100%;
   }
 }

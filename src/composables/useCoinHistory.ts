@@ -20,7 +20,7 @@ const coinMap: Record<string, string> = {
   SOL: 'zNZHO_Sjf',
 }
 
-export function useCoinHistory(coin: Ref<string>) {
+export function useCoinHistory(coin: Ref<string>, period: Ref<string>) {
   const uuid = computed(() => {
     const symbol = coin.value.toUpperCase()
     return coinMap[symbol]
@@ -29,7 +29,7 @@ export function useCoinHistory(coin: Ref<string>) {
   const url = computed(() => {
     if (!uuid.value)
       return ''
-    return `https://api.coinranking.com/v2/coin/${uuid.value}/history?timePeriod=7d`
+    return `https://api.coinranking.com/v2/coin/${uuid.value}/history?timePeriod=${period.value}`
   })
 
   const { data, error, isFetching } = useFetch<CoinRankingResponse>(url)

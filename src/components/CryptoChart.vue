@@ -18,6 +18,7 @@ import { getStyle } from '../utils/getStyle'
 const props = defineProps<{
   history: CoinRankingHistory[]
   coinSymbol: string
+  period: string
 }>()
 
 Chart.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, Filler)
@@ -50,7 +51,10 @@ function renderChart() {
 
   const labels = props.history.map((p) => {
     const date = new Date(p.timestamp * 1000)
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    if (props.period === '24h') {
+      return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+    }
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   })
 
   const dataPoints = props.history.map(p => Number.parseFloat(p.price))
