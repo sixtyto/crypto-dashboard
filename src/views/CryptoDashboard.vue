@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import CryptoChart from '../components/CryptoChart.vue'
+import CryptoStats from '../components/CryptoStats.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import { useCoinHistory } from '../composables/useCoinHistory'
 import { useQueryParameter } from '../composables/useQueryParameter'
@@ -66,6 +67,8 @@ const { history, isFetching } = useCoinHistory(coin, period)
           </select>
         </div>
       </div>
+
+      <CryptoStats :coin="coin" />
 
       <CryptoChart
         v-if="history.length > 0"
