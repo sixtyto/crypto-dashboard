@@ -180,11 +180,10 @@ select:focus {
     display: flex;
     flex-direction: column;
     text-align: center;
-    padding-top: var(--spacing-lg); /* Make room for toggle if absolute, or just space */
+    padding-top: var(--spacing-lg);
   }
 
   .theme-toggle-wrapper {
-    /* Keep it in the top right corner visually */
     position: absolute;
     top: 0;
     right: 0;
