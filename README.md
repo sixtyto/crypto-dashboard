@@ -1,48 +1,36 @@
-# crypto-dashboard
+# Crypto Dashboard
 
-This template should help get you started developing with Vue 3 in Vite.
+A simple, real-time cryptocurrency dashboard built with **Vue 3**, **TypeScript**, and **Chart.js**.
 
-## Recommended IDE Setup
+## Features
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Real-time Data**: Fetches live crypto prices and stats via CoinRanking API.
+- **Interactive Charts**: Visualizes price history with different time periods (24h, 7d, 30d, etc.).
+- **URL Synchronization**: Stores selected coin and time period in the URL for easy sharing.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
+- **Dark/Light Mode**: Fully themeable UI.
 
-## Recommended Browser Setup
+## Tech Stack
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- Vue 3 (Composition API)
+- TypeScript
+- Vite
+- Chart.js
+- CoinRanking API
 
-## Type Support for `.vue` Imports in TS
+## Getting Started
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-## Customize configuration
+2. **Run development server**:
+   ```bash
+   npm run dev
+   ```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+3. **Build for production**:
+   ```bash
+   npm run build
+   ```
