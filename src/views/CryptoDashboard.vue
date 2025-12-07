@@ -1,11 +1,12 @@
 <script lang="ts" setup>
+import type { CoinSymbol } from '../constants/coins'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import { useCoinHistory } from '../composables/useCoinHistory'
 import { useQueryParameter } from '../composables/useQueryParameter'
 
-const coin = useQueryParameter('coin', 'BTC')
+const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
 const period = useQueryParameter('period', '7d')
 const { history, isFetching } = useCoinHistory(coin, period)
 </script>
@@ -72,7 +73,7 @@ const { history, isFetching } = useCoinHistory(coin, period)
 
       <CryptoChart
         v-if="history.length > 0"
-        :coin-symbol="coin"
+        :coin="coin"
         :history="history"
         :period="period"
       />

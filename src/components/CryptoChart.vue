@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { CoinRankingHistory } from '../composables/useCoinHistory'
+import type { CoinSymbol } from '@/constants/coins'
 import {
   CategoryScale,
   Chart,
@@ -15,9 +16,9 @@ import { markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } fro
 import { useTheme } from '../composables/useTheme'
 import { getStyle } from '../utils/getStyle'
 
-const props = defineProps<{
+const { history, coin, period } = defineProps<{
   history: CoinRankingHistory[]
-  coinSymbol: string
+  coin: CoinSymbol
   period: string
 }>()
 
@@ -49,15 +50,15 @@ function renderChart() {
   gradient.addColorStop(0, accentGlow)
   gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
 
-  const labels = props.history.map((p) => {
+  const labels = history.map((p) => {
     const date = new Date(p.timestamp * 1000)
-    if (props.period === '24h') {
+    if (period === '24h') {
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
     }
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   })
 
-  const dataPoints = props.history.map(p => Number.parseFloat(p.price))
+  const dataPoints = history.map(p => Number.parseFloat(p.price))
 
   chartInstance.value = markRaw(new Chart(canvas.value, {
     type: 'line',
@@ -65,7 +66,7 @@ function renderChart() {
       labels,
       datasets: [
         {
-          label: `${props.coinSymbol} Price`,
+          label: `${coin} Price`,
           data: dataPoints,
           borderColor: accentColor,
           backgroundColor: gradient,
@@ -148,10 +149,10 @@ function renderChart() {
   }))
 }
 
-watch([theme, () => props.history], () => nextTick(() => renderChart()))
+watch([theme, () => history], () => nextTick(() => renderChart()))
 
 onMounted(() => {
-  if (props.history.length > 0) {
+  if (history.length > 0) {
     renderChart()
   }
 })

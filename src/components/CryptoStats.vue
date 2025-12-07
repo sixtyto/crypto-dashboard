@@ -2,8 +2,7 @@
 import type { CoinSymbol } from '@/constants/coins'
 import { useCoinDetails } from '@/composables/useCoinDetails'
 
-
-const {coin} = defineProps<{
+const { coin } = defineProps<{
   coin: CoinSymbol
 }>()
 
