@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import type { CoinSymbol } from '../constants/coins'
+import CoinSelector from '../components/CoinSelector.vue'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
+import PeriodSelector from '../components/PeriodSelector.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
-import { useCoinHistory } from '../composables/useCoinHistory'
 import { useQueryParameter } from '../composables/useQueryParameter'
+import { PERIOD_OPTIONS } from '../constants/periods'
 
 const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
-const period = useQueryParameter('period', '7d')
-const { history, isFetching } = useCoinHistory(coin, period)
+const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
 </script>
 
 <template>
@@ -29,58 +30,17 @@ const { history, isFetching } = useCoinHistory(coin, period)
       </header>
 
       <div class="selectors-wrapper">
-        <div class="select-wrapper">
-          <select v-model="coin">
-            <option value="BTC">
-              Bitcoin (BTC)
-            </option>
+        <CoinSelector v-model="coin" />
 
-            <option value="ETH">
-              Ethereum (ETH)
-            </option>
-
-            <option value="SOL">
-              Solana (SOL)
-            </option>
-          </select>
-        </div>
-
-        <div class="select-wrapper">
-          <select v-model="period">
-            <option value="24h">
-              24 Hours
-            </option>
-            <option value="7d">
-              7 Days
-            </option>
-            <option value="30d">
-              30 Days
-            </option>
-            <option value="3m">
-              3 Months
-            </option>
-            <option value="1y">
-              1 Year
-            </option>
-            <option value="3y">
-              3 Years
-            </option>
-          </select>
-        </div>
+        <PeriodSelector v-model="period" />
       </div>
 
       <CryptoStats :coin="coin" />
 
       <CryptoChart
-        v-if="history.length > 0"
         :coin="coin"
-        :history="history"
         :period="period"
       />
-
-      <div v-if="isFetching" class="loading-indicator">
-        Updating live data...
-      </div>
     </div>
   </div>
 </template>
@@ -140,31 +100,6 @@ const { history, isFetching } = useCoinHistory(coin, period)
   max-width: 600px;
 }
 
-.select-wrapper {
-  position: relative;
-  width: 200px;
-}
-
-select {
-  appearance: none;
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  padding-right: 2.5rem;
-  width: 100%;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-select:focus {
-  outline: none;
-  border-color: var(--color-accent-primary);
-  box-shadow: 0 0 0 2px var(--color-accent-glow);
-}
-
 .loading-indicator {
   text-align: center;
   margin-top: 1rem;
@@ -205,11 +140,6 @@ select:focus {
   .selectors-wrapper {
     flex-direction: column;
     gap: var(--spacing-sm);
-  }
-
-  .select-wrapper {
-    width: 100%;
-    max-width: 100%;
   }
 }
 </style>

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { CoinRankingHistory } from '../composables/useCoinHistory'
 import type { CoinSymbol } from '@/constants/coins'
 import {
   CategoryScale,
@@ -13,14 +12,16 @@ import {
   Tooltip,
 } from 'chart.js'
 import { markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { useCoinHistory } from '../composables/useCoinHistory'
 import { useTheme } from '../composables/useTheme'
 import { getStyle } from '../utils/getStyle'
 
-const { history, coin, period } = defineProps<{
-  history: CoinRankingHistory[]
+const { coin, period } = defineProps<{
   coin: CoinSymbol
   period: string
 }>()
+
+const { history, isFetching } = useCoinHistory(() => coin, () => period)
 
 Chart.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, Filler)
 
@@ -50,7 +51,7 @@ function renderChart() {
   gradient.addColorStop(0, accentGlow)
   gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
 
-  const labels = history.map((p) => {
+  const labels = history.value.map((p) => {
     const date = new Date(p.timestamp * 1000)
     if (period === '24h') {
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
@@ -58,7 +59,7 @@ function renderChart() {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   })
 
-  const dataPoints = history.map(p => Number.parseFloat(p.price))
+  const dataPoints = history.value.map(p => Number.parseFloat(p.price))
 
   chartInstance.value = markRaw(new Chart(canvas.value, {
     type: 'line',
@@ -149,11 +150,11 @@ function renderChart() {
   }))
 }
 
-watch([theme, () => history], () => nextTick(() => renderChart()))
+watch([theme, history], () => nextTick(() => renderChart()))
 
-onMounted(() => {
-  if (history.length > 0) {
-    renderChart()
+watch(isFetching, (newValue) => {
+  if (!newValue) {
+    nextTick(() => renderChart())
   }
 })
 
@@ -166,7 +167,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="chart-wrapper">
+  <div v-if="isFetching" class="loading-indicator">
+    Updating live data...
+  </div>
+
+  <div v-show="!isFetching" class="chart-wrapper">
     <canvas ref="canvas" />
   </div>
 </template>

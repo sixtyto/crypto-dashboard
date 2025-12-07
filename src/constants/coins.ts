@@ -6,3 +6,9 @@ export const COIN_MAP: Record<CoinSymbol, string> = {
   ETH: 'razxDUgYGNAdQ',
   SOL: 'zNZHO_Sjf',
 }
+
+export const COIN_OPTIONS: { value: CoinSymbol, label: string }[] = [
+  { value: 'BTC', label: 'Bitcoin (BTC)' },
+  { value: 'ETH', label: 'Ethereum (ETH)' },
+  { value: 'SOL', label: 'Solana (SOL)' },
+]
