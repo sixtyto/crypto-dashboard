@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useCoinDetails } from '../useCoinDetails'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
+import { useCoinDetails } from '../useCoinDetails'
 import * as useFetchModule from '../useFetch'
 
 vi.mock('../useFetch', () => ({
@@ -38,9 +38,9 @@ describe('useCoinDetails', () => {
       status: 'success',
       data: {
         coin: {
-          price: '50000',
-          change: '5',
-          marketCap: '1000000000',
+          'price': '50000',
+          'change': '5',
+          'marketCap': '1000000000',
           '24hVolume': '50000000',
         },
       },
@@ -49,15 +49,15 @@ describe('useCoinDetails', () => {
     const { details } = useCoinDetails('BTC')
 
     expect(details.value).toEqual({
-      price: '50000',
-      change: '5',
-      marketCap: '1000000000',
+      'price': '50000',
+      'change': '5',
+      'marketCap': '1000000000',
       '24hVolume': '50000000',
     })
   })
 
   it('should return null when data fetch fails or is invalid', () => {
-     mockUseFetchData.value = {
+    mockUseFetchData.value = {
       status: 'fail',
     }
     const { details } = useCoinDetails('BTC')
@@ -74,7 +74,7 @@ describe('useCoinDetails', () => {
   })
 
   it('should not construct URL if coin is not in map', () => {
-    // @ts-ignore
+    // @ts-expect-error Testing invalid input
     useCoinDetails('INVALID')
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)

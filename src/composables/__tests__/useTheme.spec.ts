@@ -1,20 +1,20 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { useTheme } from '../useTheme'
-import { defineComponent, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent, nextTick } from 'vue'
+import { useTheme } from '../useTheme'
 
 const TestComponent = defineComponent({
   template: '<div></div>',
   setup() {
     return useTheme()
-  }
+  },
 })
 
 describe('useTheme', () => {
   beforeEach(() => {
     localStorage.clear()
     document.documentElement.removeAttribute('data-theme')
-     Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation(query => ({
         matches: false,
@@ -36,7 +36,7 @@ describe('useTheme', () => {
   })
 
   it('should initialize with light theme if system prefers light', () => {
-     Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation(query => ({
         matches: query === '(prefers-color-scheme: light)',
@@ -51,28 +51,28 @@ describe('useTheme', () => {
   })
 
   it('should initialize with saved theme from local storage', () => {
-      localStorage.setItem('theme', 'light')
-      const wrapper = mount(TestComponent)
-      expect(wrapper.vm.theme).toBe('light')
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+    localStorage.setItem('theme', 'light')
+    const wrapper = mount(TestComponent)
+    expect(wrapper.vm.theme).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
   })
 
   it('should toggle theme', async () => {
-      const wrapper = mount(TestComponent)
-      expect(wrapper.vm.theme).toBe('dark')
+    const wrapper = mount(TestComponent)
+    expect(wrapper.vm.theme).toBe('dark')
 
-      wrapper.vm.toggleTheme()
-      await nextTick() // Wait for Vue to process the state change and watchers
+    wrapper.vm.toggleTheme()
+    await nextTick() // Wait for Vue to process the state change and watchers
 
-      expect(wrapper.vm.theme).toBe('light')
-      expect(localStorage.getItem('theme')).toBe('light')
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+    expect(wrapper.vm.theme).toBe('light')
+    expect(localStorage.getItem('theme')).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
 
-      wrapper.vm.toggleTheme()
-      await nextTick()
+    wrapper.vm.toggleTheme()
+    await nextTick()
 
-      expect(wrapper.vm.theme).toBe('dark')
-      expect(localStorage.getItem('theme')).toBe('dark')
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(wrapper.vm.theme).toBe('dark')
+    expect(localStorage.getItem('theme')).toBe('dark')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
   })
 })

@@ -1,26 +1,26 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ThemeToggle from '../ThemeToggle.vue'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import * as useThemeModule from '../../composables/useTheme'
+import ThemeToggle from '../ThemeToggle.vue'
 
 vi.mock('../../composables/useTheme', () => ({
-  useTheme: vi.fn()
+  useTheme: vi.fn(),
 }))
 
-describe('ThemeToggle.vue', () => {
-    const mockTheme = ref('dark')
-    const mockToggleTheme = vi.fn()
+describe('themeToggle.vue', () => {
+  const mockTheme = ref('dark')
+  const mockToggleTheme = vi.fn()
 
-    beforeEach(() => {
-        mockTheme.value = 'dark'
-        vi.clearAllMocks()
+  beforeEach(() => {
+    mockTheme.value = 'dark'
+    vi.clearAllMocks()
 
-        vi.mocked(useThemeModule.useTheme).mockReturnValue({
-            theme: mockTheme,
-            toggleTheme: mockToggleTheme
-        })
+    vi.mocked(useThemeModule.useTheme).mockReturnValue({
+      theme: mockTheme,
+      toggleTheme: mockToggleTheme,
     })
+  })
 
   it('renders correctly', () => {
     const wrapper = mount(ThemeToggle)

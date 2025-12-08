@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { getStyle } from '../getStyle'
 
 describe('getStyle', () => {
@@ -16,7 +16,7 @@ describe('getStyle', () => {
   })
 
   it('should trim the returned value', () => {
-     const mockGetComputedStyle = vi.fn().mockReturnValue({
+    const mockGetComputedStyle = vi.fn().mockReturnValue({
       getPropertyValue: vi.fn().mockReturnValue('  red  '),
     })
     vi.stubGlobal('getComputedStyle', mockGetComputedStyle)

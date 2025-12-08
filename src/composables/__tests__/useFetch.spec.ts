@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { useFetch } from '../useFetch'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
+import { useFetch } from '../useFetch'
 
 // Mock global fetch
-global.fetch = vi.fn()
+globalThis.fetch = vi.fn()
 
 describe('useFetch', () => {
   beforeEach(() => {
@@ -12,12 +12,12 @@ describe('useFetch', () => {
   })
 
   afterEach(() => {
-      vi.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('should fetch data successfully', async () => {
     const mockData = { id: 1, name: 'Test' }
-    ;(global.fetch as any).mockResolvedValue({
+    ;(globalThis.fetch as any).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     })
@@ -35,14 +35,14 @@ describe('useFetch', () => {
 
   it('should handle fetch errors and retry', async () => {
     const errorMessage = 'Network error'
-    ;(global.fetch as any).mockRejectedValue(new Error(errorMessage))
+    ;(globalThis.fetch as any).mockRejectedValue(new Error(errorMessage))
 
     const { data, error, isFetching } = useFetch('https://api.example.com/error')
 
     // 1st attempt fails, waits 1s
     await vi.runAllTimersAsync()
     // It should have called fetch 4 times (1 initial + 3 retries)
-    expect(global.fetch).toHaveBeenCalledTimes(4)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(4)
 
     expect(error.value).toBeTruthy()
     expect(data.value).toBeNull()
@@ -50,24 +50,24 @@ describe('useFetch', () => {
   })
 
   it('should handle non-ok response', async () => {
-       ;(global.fetch as any).mockResolvedValue({
+    ;(globalThis.fetch as any).mockResolvedValue({
       ok: false,
       status: 404,
       statusText: 'Not Found',
       json: async () => ({ message: 'Resource not found' }),
     })
 
-    const { data, error } = useFetch('https://api.example.com/404')
+    const { error } = useFetch('https://api.example.com/404')
 
     await vi.runAllTimersAsync()
 
-    expect(global.fetch).toHaveBeenCalledTimes(4) // Retries on error thrown
+    expect(globalThis.fetch).toHaveBeenCalledTimes(4) // Retries on error thrown
     expect(error.value).toBeTruthy()
     expect(error.value.message).toBe('Resource not found')
   })
 
-    it('should handle non-ok response without json message', async () => {
-       ;(global.fetch as any).mockResolvedValue({
+  it('should handle non-ok response without json message', async () => {
+    ;(globalThis.fetch as any).mockResolvedValue({
       ok: false,
       status: 500,
       statusText: 'Internal Server Error',
@@ -82,9 +82,9 @@ describe('useFetch', () => {
   })
 
   it('should not fetch if url is empty', async () => {
-      const { isFetching } = useFetch('')
-      expect(isFetching.value).toBe(false)
-      expect(global.fetch).not.toHaveBeenCalled()
+    const { isFetching } = useFetch('')
+    expect(isFetching.value).toBe(false)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 
   it('should refetch when url changes', async () => {
@@ -93,7 +93,7 @@ describe('useFetch', () => {
 
     const url = ref('https://api.example.com/1')
 
-    ;(global.fetch as any)
+    ;(globalThis.fetch as any)
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockData1,

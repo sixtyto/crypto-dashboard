@@ -1,15 +1,15 @@
-import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import CoinSelector from '../CoinSelector.vue'
+import { describe, expect, it } from 'vitest'
 import { COIN_OPTIONS } from '../../constants/coins'
+import CoinSelector from '../CoinSelector.vue'
 
-describe('CoinSelector.vue', () => {
+describe('coinSelector.vue', () => {
   it('renders all options', () => {
     const wrapper = mount(CoinSelector, {
       props: {
-        modelValue: 'BTC',
-        'onUpdate:modelValue': (e: any) => wrapper.setProps({ modelValue: e })
-      }
+        'modelValue': 'BTC',
+        'onUpdate:modelValue': (e: any) => wrapper.setProps({ modelValue: e }),
+      },
     })
 
     const options = wrapper.findAll('option')
@@ -17,11 +17,11 @@ describe('CoinSelector.vue', () => {
   })
 
   it('updates model when selection changes', async () => {
-     const wrapper = mount(CoinSelector, {
+    const wrapper = mount(CoinSelector, {
       props: {
-        modelValue: 'BTC',
-        'onUpdate:modelValue': (e: any) => wrapper.setProps({ modelValue: e })
-      }
+        'modelValue': 'BTC',
+        'onUpdate:modelValue': (e: any) => wrapper.setProps({ modelValue: e }),
+      },
     })
 
     const select = wrapper.find('select')

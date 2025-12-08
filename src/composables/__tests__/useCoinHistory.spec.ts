@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useCoinHistory } from '../useCoinHistory'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
+import { useCoinHistory } from '../useCoinHistory'
 import * as useFetchModule from '../useFetch'
 
 vi.mock('../useFetch', () => ({
@@ -14,19 +14,19 @@ vi.mock('../../constants/coins', () => ({
 }))
 
 describe('useCoinHistory', () => {
-    const mockUseFetchData = ref<any>(null)
+  const mockUseFetchData = ref<any>(null)
 
-    beforeEach(() => {
-        mockUseFetchData.value = null
-        vi.clearAllMocks()
+  beforeEach(() => {
+    mockUseFetchData.value = null
+    vi.clearAllMocks()
 
-        vi.mocked(useFetchModule.useFetch).mockReturnValue({
-            data: mockUseFetchData,
-            error: ref(null),
-            isFetching: ref(false),
-            refetch: vi.fn(),
-        })
+    vi.mocked(useFetchModule.useFetch).mockReturnValue({
+      data: mockUseFetchData,
+      error: ref(null),
+      isFetching: ref(false),
+      refetch: vi.fn(),
     })
+  })
 
   it('should return reversed history when data is fetched', () => {
     mockUseFetchData.value = {
@@ -48,13 +48,13 @@ describe('useCoinHistory', () => {
   })
 
   it('should return empty array if data is invalid', () => {
-      mockUseFetchData.value = { status: 'fail' }
-      const { history } = useCoinHistory('BTC', '24h')
-      expect(history.value).toEqual([])
+    mockUseFetchData.value = { status: 'fail' }
+    const { history } = useCoinHistory('BTC', '24h')
+    expect(history.value).toEqual([])
   })
 
   it('should not construct URL if coin is not in map', () => {
-    // @ts-ignore
+    // @ts-expect-error Testing invalid input
     useCoinHistory('INVALID', '24h')
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
