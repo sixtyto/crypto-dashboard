@@ -3,13 +3,17 @@ import type { CoinSymbol } from '../constants/coins'
 import CoinSelector from '../components/CoinSelector.vue'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
+import HoldingsCalculator from '../components/HoldingsCalculator.vue'
 import PeriodSelector from '../components/PeriodSelector.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
+import { useCoinDetails } from '../composables/useCoinDetails'
 import { useQueryParameter } from '../composables/useQueryParameter'
 import { PERIOD_OPTIONS } from '../constants/periods'
 
 const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
 const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
+
+const { details, isFetching } = useCoinDetails(() => coin.value)
 </script>
 
 <template>
@@ -35,7 +39,16 @@ const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS
         <PeriodSelector v-model="period" />
       </div>
 
-      <CryptoStats :coin="coin" />
+      <CryptoStats
+        :details="details"
+        :is-fetching="isFetching"
+      />
+
+      <HoldingsCalculator
+        :current-price="details?.price"
+        :coin-symbol="coin"
+        :is-fetching="isFetching"
+      />
 
       <CryptoChart
         :coin="coin"
