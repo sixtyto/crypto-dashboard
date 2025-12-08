@@ -1,90 +1,90 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useQueryParameter } from '../useQueryParameter'
+import { mount } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import { defineComponent, nextTick } from 'vue'
-import { mount, flushPromises } from '@vue/test-utils'
+import { useQueryParameter } from '../useQueryParameter'
 
 const TestComponent = defineComponent({
   template: '<div></div>',
   setup() {
     const param = useQueryParameter('q', 'default')
-    const validatedParam = useQueryParameter('v', 'valid', (val) => val === 'allowed')
+    const validatedParam = useQueryParameter('v', 'valid', val => val === 'allowed')
     return { param, validatedParam }
-  }
+  },
 })
 
 describe('useQueryParameter', () => {
-    let router: any
+  let router: any
 
-    beforeEach(async () => {
-        router = createRouter({
-            history: createWebHistory(),
-            routes: [{ path: '/', component: TestComponent }]
-        })
-        router.push('/')
-        await router.isReady()
+  beforeEach(async () => {
+    router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: '/', component: TestComponent }],
+    })
+    router.push('/')
+    await router.isReady()
+  })
+
+  it('should return default value if query param is missing', async () => {
+    const wrapper = mount(TestComponent, {
+      global: {
+        plugins: [router],
+      },
     })
 
-    it('should return default value if query param is missing', async () => {
-        const wrapper = mount(TestComponent, {
-            global: {
-                plugins: [router]
-            }
-        })
+    expect(wrapper.vm.param).toBe('default')
+  })
 
-        expect(wrapper.vm.param).toBe('default')
+  it('should return query param value if present', async () => {
+    await router.push({ query: { q: 'test' } })
+    const wrapper = mount(TestComponent, {
+      global: {
+        plugins: [router],
+      },
+    })
+    expect(wrapper.vm.param).toBe('test')
+  })
+
+  it('should update query param when value is set', async () => {
+    const wrapper = mount(TestComponent, {
+      global: {
+        plugins: [router],
+      },
     })
 
-    it('should return query param value if present', async () => {
-        await router.push({ query: { q: 'test' } })
-         const wrapper = mount(TestComponent, {
-            global: {
-                plugins: [router]
-            }
-        })
-        expect(wrapper.vm.param).toBe('test')
+    wrapper.vm.param = 'newValue'
+
+    // Wait for the router to update
+    await vi.waitUntil(() => router.currentRoute.value.query.q === 'newValue', { timeout: 1000 })
+
+    expect(router.currentRoute.value.query.q).toBe('newValue')
+  })
+
+  it('should remove query param when set to empty/null', async () => {
+    await router.push({ query: { q: 'test' } })
+    const wrapper = mount(TestComponent, {
+      global: {
+        plugins: [router],
+      },
     })
 
-    it('should update query param when value is set', async () => {
-        const wrapper = mount(TestComponent, {
-            global: {
-                plugins: [router]
-            }
-        })
+    wrapper.vm.param = ''
 
-        wrapper.vm.param = 'newValue'
+    await vi.waitUntil(() => router.currentRoute.value.query.q === undefined, { timeout: 1000 })
 
-        // Wait for the router to update
-        await vi.waitUntil(() => router.currentRoute.value.query.q === 'newValue', { timeout: 1000 })
+    expect(router.currentRoute.value.query.q).toBeUndefined()
+  })
 
-        expect(router.currentRoute.value.query.q).toBe('newValue')
+  it('should validate query param value', async () => {
+    await router.push({ query: { v: 'allowed' } })
+    const wrapper = mount(TestComponent, {
+      global: {
+        plugins: [router],
+      },
     })
+    expect(wrapper.vm.validatedParam).toBe('allowed')
 
-    it('should remove query param when set to empty/null', async () => {
-        await router.push({ query: { q: 'test' } })
-         const wrapper = mount(TestComponent, {
-            global: {
-                plugins: [router]
-            }
-        })
-
-        wrapper.vm.param = ''
-
-        await vi.waitUntil(() => router.currentRoute.value.query.q === undefined, { timeout: 1000 })
-
-        expect(router.currentRoute.value.query.q).toBeUndefined()
-    })
-
-    it('should validate query param value', async () => {
-        await router.push({ query: { v: 'allowed' } })
-        const wrapper = mount(TestComponent, {
-            global: {
-                plugins: [router]
-            }
-        })
-        expect(wrapper.vm.validatedParam).toBe('allowed')
-
-        await router.push({ query: { v: 'invalid' } })
-        expect(wrapper.vm.validatedParam).toBe('valid') // fallback to default
-    })
+    await router.push({ query: { v: 'invalid' } })
+    expect(wrapper.vm.validatedParam).toBe('valid') // fallback to default
+  })
 })
