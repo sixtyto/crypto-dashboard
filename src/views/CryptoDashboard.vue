@@ -13,7 +13,7 @@ import { PERIOD_OPTIONS } from '../constants/periods'
 const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
 const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
 
-const { details, isFetching } = useCoinDetails(() => coin.value)
+const { details, isFetching, lastUpdated } = useCoinDetails(() => coin.value)
 </script>
 
 <template>
@@ -42,6 +42,7 @@ const { details, isFetching } = useCoinDetails(() => coin.value)
       <CryptoStats
         :details="details"
         :is-fetching="isFetching"
+        :last-updated="lastUpdated"
       />
 
       <HoldingsCalculator

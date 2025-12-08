@@ -7,7 +7,8 @@ describe('CryptoStats.vue', () => {
     const wrapper = mount(CryptoStats, {
       props: {
         details: null,
-        isFetching: true
+        isFetching: true,
+        lastUpdated: null
       }
     })
 
@@ -24,7 +25,8 @@ describe('CryptoStats.vue', () => {
     const wrapper = mount(CryptoStats, {
       props: {
         details,
-        isFetching: false
+        isFetching: false,
+        lastUpdated: new Date()
       }
     })
 
@@ -46,7 +48,8 @@ describe('CryptoStats.vue', () => {
     const wrapper = mount(CryptoStats, {
       props: {
         details,
-        isFetching: false
+        isFetching: false,
+        lastUpdated: new Date()
       }
     })
 
