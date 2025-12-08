@@ -59,7 +59,6 @@ describe('useCoinHistory', () => {
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     const passedUrlRef = useFetchMock.mock.calls[0][0]
-    // @ts-ignore
     expect(passedUrlRef.value).toBe('')
   })
 })

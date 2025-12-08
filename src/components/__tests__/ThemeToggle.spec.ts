@@ -27,26 +27,16 @@ describe('ThemeToggle.vue', () => {
     expect(wrapper.exists()).toBe(true)
   })
 
-  it('displays MoonIcon when theme is dark (indicating current state or action depending on UX)', () => {
+  it('displays MoonIcon when theme is dark', () => {
     mockTheme.value = 'dark'
     const wrapper = mount(ThemeToggle)
-
-    // When theme is dark, isDark is true.
-    // Template: <SunIcon v-if="!isDark" /> <MoonIcon v-else />
-    // So it renders MoonIcon.
-
     expect(wrapper.findComponent({ name: 'MoonIcon' }).exists()).toBe(true)
     expect(wrapper.attributes('title')).toBe('Switch to Light Mode')
   })
 
-  it('displays SunIcon when theme is light (indicating current state or action depending on UX)', () => {
+  it('displays SunIcon when theme is light', () => {
     mockTheme.value = 'light'
     const wrapper = mount(ThemeToggle)
-
-    // When theme is light, isDark is false.
-    // Template: <SunIcon v-if="!isDark" />
-    // So it renders SunIcon.
-
     expect(wrapper.findComponent({ name: 'SunIcon' }).exists()).toBe(true)
     expect(wrapper.attributes('title')).toBe('Switch to Dark Mode')
   })

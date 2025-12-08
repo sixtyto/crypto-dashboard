@@ -3,12 +3,10 @@ import { useCoinDetails } from '../useCoinDetails'
 import { ref } from 'vue'
 import * as useFetchModule from '../useFetch'
 
-// Mock useFetch as a function that returns what we want
 vi.mock('../useFetch', () => ({
   useFetch: vi.fn(),
 }))
 
-// Mock COIN_MAP
 vi.mock('../../constants/coins', () => ({
   COIN_MAP: {
     BTC: 'Qwsogvtv82FCd',
@@ -27,7 +25,6 @@ describe('useCoinDetails', () => {
     mockUseFetchIsFetching.value = false
     vi.clearAllMocks()
 
-    // Configure the mock return value
     vi.mocked(useFetchModule.useFetch).mockReturnValue({
       data: mockUseFetchData,
       error: mockUseFetchError,
@@ -73,7 +70,6 @@ describe('useCoinDetails', () => {
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     expect(useFetchMock).toHaveBeenCalled()
     const passedUrlRef = useFetchMock.mock.calls[0][0]
-    // @ts-ignore
     expect(passedUrlRef.value).toContain('razxDUgYGNAdQ')
   })
 
@@ -83,7 +79,6 @@ describe('useCoinDetails', () => {
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     const passedUrlRef = useFetchMock.mock.calls[0][0]
-    // @ts-ignore
     expect(passedUrlRef.value).toBe('')
   })
 })

@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import CoinSelector from '../CoinSelector.vue'
-
-// Mock constants if needed, but they are just data.
-// We can import them to check against.
 import { COIN_OPTIONS } from '../../constants/coins'
 
 describe('CoinSelector.vue', () => {

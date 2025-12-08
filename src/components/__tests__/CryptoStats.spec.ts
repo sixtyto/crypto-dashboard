@@ -44,15 +44,8 @@ describe('CryptoStats.vue', () => {
       props: { coin: 'BTC' }
     })
 
-    // Check price formatting
     expect(wrapper.text()).toContain('$50,000.12')
-
-    // Check change
     expect(wrapper.text()).toContain('+5.5%')
-
-    // Check market cap (compact)
-    // 1B = 1,000,000,000
-    // Intl compact output "$1.0B" with max fraction digits 1
     expect(wrapper.text()).toContain('$1.0B')
   })
 
