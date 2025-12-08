@@ -13,8 +13,8 @@ const amount = ref<number | null>(null)
 watch(() => props.coinSymbol, (newSymbol) => {
   const saved = localStorage.getItem(`crypto-holdings-${newSymbol}`)
   if (saved) {
-    const parsed = parseFloat(saved)
-    if (!isNaN(parsed)) {
+    const parsed = Number.parseFloat(saved)
+    if (!Number.isNaN(parsed)) {
       amount.value = parsed
       return
     }

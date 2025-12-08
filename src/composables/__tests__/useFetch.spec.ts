@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ref, effectScope, nextTick } from 'vue'
+import { effectScope, nextTick, ref } from 'vue'
 import { useFetch } from '../useFetch'
 
 // Mock global fetch

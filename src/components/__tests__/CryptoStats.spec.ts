@@ -1,15 +1,15 @@
-import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
 import CryptoStats from '../CryptoStats.vue'
 
-describe('CryptoStats.vue', () => {
+describe('cryptoStats.vue', () => {
   it('renders skeleton when loading', () => {
     const wrapper = mount(CryptoStats, {
       props: {
         details: null,
         isFetching: true,
-        lastUpdated: null
-      }
+        lastUpdated: null,
+      },
     })
 
     expect(wrapper.findAll('.skeleton').length).toBeGreaterThan(0)
@@ -17,17 +17,17 @@ describe('CryptoStats.vue', () => {
 
   it('renders stats when loaded', () => {
     const details = {
-        price: '50000.1234',
-        change: '5.5',
-        marketCap: '1000000000',
-        '24hVolume': '50000000'
+      'price': '50000.1234',
+      'change': '5.5',
+      'marketCap': '1000000000',
+      '24hVolume': '50000000',
     }
     const wrapper = mount(CryptoStats, {
       props: {
         details,
         isFetching: false,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     })
 
     expect(wrapper.text()).toContain('$50,000.12')
@@ -39,18 +39,18 @@ describe('CryptoStats.vue', () => {
   })
 
   it('renders negative change correctly', () => {
-      const details = {
-        price: '50000',
-        change: '-2.5',
-        marketCap: '1000',
-        '24hVolume': '500'
+    const details = {
+      'price': '50000',
+      'change': '-2.5',
+      'marketCap': '1000',
+      '24hVolume': '500',
     }
     const wrapper = mount(CryptoStats, {
       props: {
         details,
         isFetching: false,
-        lastUpdated: new Date()
-      }
+        lastUpdated: new Date(),
+      },
     })
 
     expect(wrapper.text()).toContain('-2.5%')

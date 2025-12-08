@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import HoldingsCalculator from '../HoldingsCalculator.vue'
 
-describe('HoldingsCalculator', () => {
+describe('holdingsCalculator', () => {
   const mockProps = {
     currentPrice: '50000',
     coinSymbol: 'BTC',
-    isFetching: false
+    isFetching: false,
   }
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('HoldingsCalculator', () => {
 
   it('renders correctly', () => {
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
     expect(wrapper.text()).toContain('Holdings Calculator')
     expect(wrapper.find('input').exists()).toBe(true)
@@ -24,7 +24,7 @@ describe('HoldingsCalculator', () => {
 
   it('calculates total value correctly when amount is entered', async () => {
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
 
     const input = wrapper.find('input')
@@ -35,7 +35,7 @@ describe('HoldingsCalculator', () => {
 
   it('handles empty or null amount', async () => {
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
 
     const input = wrapper.find('input')
@@ -46,7 +46,7 @@ describe('HoldingsCalculator', () => {
 
   it('persists amount to localStorage', async () => {
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
 
     const input = wrapper.find('input')
@@ -59,7 +59,7 @@ describe('HoldingsCalculator', () => {
     localStorage.setItem('crypto-holdings-BTC', '0.5')
 
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
 
     const input = wrapper.find<HTMLInputElement>('input')
@@ -71,14 +71,14 @@ describe('HoldingsCalculator', () => {
     localStorage.setItem('crypto-holdings-ETH', '10')
 
     const wrapper = mount(HoldingsCalculator, {
-      props: mockProps
+      props: mockProps,
     })
 
     expect(wrapper.text()).toContain('Amount Owned (BTC)')
 
     await wrapper.setProps({
       coinSymbol: 'ETH',
-      currentPrice: '3000'
+      currentPrice: '3000',
     })
 
     expect(wrapper.text()).toContain('Amount Owned (ETH)')
@@ -88,14 +88,14 @@ describe('HoldingsCalculator', () => {
   })
 
   it('shows skeleton loader when fetching', async () => {
-      localStorage.setItem('crypto-holdings-BTC', '1')
-      const wrapper = mount(HoldingsCalculator, {
-        props: {
-            ...mockProps,
-            isFetching: true
-        }
-      })
+    localStorage.setItem('crypto-holdings-BTC', '1')
+    const wrapper = mount(HoldingsCalculator, {
+      props: {
+        ...mockProps,
+        isFetching: true,
+      },
+    })
 
-      expect(wrapper.find('.skeleton').exists()).toBe(true)
+    expect(wrapper.find('.skeleton').exists()).toBe(true)
   })
 })
