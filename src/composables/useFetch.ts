@@ -1,10 +1,15 @@
 import type { MaybeRefOrGetter } from 'vue'
-import { ref, toValue, watch } from 'vue'
+import { onScopeDispose, ref, toValue, watch } from 'vue'
 
-export function useFetch<T>(url: MaybeRefOrGetter<string>) {
+interface UseFetchOptions {
+  pollingInterval?: number
+}
+
+export function useFetch<T>(url: MaybeRefOrGetter<string>, options: UseFetchOptions = {}) {
   const data = ref<T | null>(null)
   const error = ref<any>(null)
   const isFetching = ref(false)
+  const lastUpdated = ref<Date | null>(null)
 
   const fetchData = async () => {
     const urlValue = toValue(url)
@@ -25,6 +30,7 @@ export function useFetch<T>(url: MaybeRefOrGetter<string>) {
         }
         data.value = await response.json()
         error.value = null
+        lastUpdated.value = new Date()
         break
       }
       catch (err) {
@@ -37,9 +43,30 @@ export function useFetch<T>(url: MaybeRefOrGetter<string>) {
     isFetching.value = false
   }
 
+  let intervalId: ReturnType<typeof setInterval> | null = null
+
+  const startPolling = () => {
+    if (options.pollingInterval && options.pollingInterval > 0) {
+      intervalId = setInterval(fetchData, options.pollingInterval)
+    }
+  }
+
+  const stopPolling = () => {
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = null
+    }
+  }
+
   watch(() => toValue(url), () => {
+    stopPolling()
     fetchData()
+    startPolling()
   }, { immediate: true })
 
-  return { data, error, isFetching, refetch: fetchData }
+  onScopeDispose(() => {
+    stopPolling()
+  })
+
+  return { data, error, isFetching, lastUpdated, refetch: fetchData }
 }
