@@ -1,7 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
-import type { CoinSymbol } from '../constants/coins'
 import { computed, toValue } from 'vue'
-import { COIN_MAP } from '../constants/coins'
 import { useFetch } from './useFetch'
 
 export interface CoinRankingHistory {
@@ -16,13 +14,12 @@ interface CoinRankingResponse {
   }
 }
 
-export function useCoinHistory(coin: MaybeRefOrGetter<CoinSymbol>, period: MaybeRefOrGetter<string>) {
-  const uuid = computed(() => COIN_MAP[toValue(coin)])
-
+export function useCoinHistory(coinUuid: MaybeRefOrGetter<string>, period: MaybeRefOrGetter<string>) {
   const url = computed(() => {
-    if (!uuid.value)
+    const uuid = toValue(coinUuid)
+    if (!uuid)
       return ''
-    return `https://api.coinranking.com/v2/coin/${uuid.value}/history?timePeriod=${toValue(period)}`
+    return `https://api.coinranking.com/v2/coin/${uuid}/history?timePeriod=${toValue(period)}`
   })
 
   const { data, error, isFetching } = useFetch<CoinRankingResponse>(url)

@@ -27,7 +27,7 @@ describe('CryptoStats.vue', () => {
   it('renders skeleton when loading', () => {
     mockIsFetching.value = true
     const wrapper = mount(CryptoStats, {
-      props: { coin: 'BTC' }
+      props: { coinUuid: 'Qwsogvtv82FCd' }
     })
 
     expect(wrapper.findAll('.skeleton').length).toBeGreaterThan(0)
@@ -41,7 +41,7 @@ describe('CryptoStats.vue', () => {
         '24hVolume': '50000000'
     }
     const wrapper = mount(CryptoStats, {
-      props: { coin: 'BTC' }
+      props: { coinUuid: 'Qwsogvtv82FCd' }
     })
 
     // Check price formatting
@@ -65,7 +65,7 @@ describe('CryptoStats.vue', () => {
         '24hVolume': '500'
     }
     const wrapper = mount(CryptoStats, {
-      props: { coin: 'BTC' }
+      props: { coinUuid: 'Qwsogvtv82FCd' }
     })
 
     expect(wrapper.text()).toContain('-2.5%')

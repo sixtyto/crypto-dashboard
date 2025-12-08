@@ -1,15 +1,25 @@
 <script lang="ts" setup>
-import type { CoinSymbol } from '../constants/coins'
+import { computed } from 'vue'
 import CoinSelector from '../components/CoinSelector.vue'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
 import PeriodSelector from '../components/PeriodSelector.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
+import { useCoins } from '../composables/useCoins'
 import { useQueryParameter } from '../composables/useQueryParameter'
 import { PERIOD_OPTIONS } from '../constants/periods'
 
-const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
+const coinSymbol = useQueryParameter<string>('coin', 'BTC')
 const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
+
+const { coins, isFetching } = useCoins()
+
+const selectedCoin = computed(() => {
+  return coins.value.find(c => c.symbol === coinSymbol.value)
+})
+
+const selectedCoinUuid = computed(() => selectedCoin.value?.uuid || '')
+const selectedCoinName = computed(() => selectedCoin.value?.name || coinSymbol.value)
 </script>
 
 <template>
@@ -30,17 +40,30 @@ const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS
       </header>
 
       <div class="selectors-wrapper">
-        <CoinSelector v-model="coin" />
+        <CoinSelector
+          v-if="!isFetching"
+          v-model="coinSymbol"
+          :coins="coins"
+        />
+        <div v-else class="loading-selector">
+          Loading coins...
+        </div>
 
         <PeriodSelector v-model="period" />
       </div>
 
-      <CryptoStats :coin="coin" />
+      <template v-if="selectedCoinUuid">
+        <CryptoStats :coin-uuid="selectedCoinUuid" />
 
-      <CryptoChart
-        :coin="coin"
-        :period="period"
-      />
+        <CryptoChart
+          :coin-uuid="selectedCoinUuid"
+          :coin-name="selectedCoinName"
+          :period="period"
+        />
+      </template>
+      <div v-else-if="!isFetching" class="error-message">
+        Coin not found.
+      </div>
     </div>
   </div>
 </template>
@@ -104,6 +127,18 @@ const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS
   text-align: center;
   margin-top: 1rem;
   color: var(--color-accent-primary);
+}
+
+.loading-selector {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+
+.error-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 640px) {

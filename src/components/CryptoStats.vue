@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import type { CoinSymbol } from '@/constants/coins'
 import { useCoinDetails } from '@/composables/useCoinDetails'
 
-const { coin } = defineProps<{
-  coin: CoinSymbol
+const { coinUuid } = defineProps<{
+  coinUuid: string
 }>()
 
-const { details, isFetching } = useCoinDetails(() => coin)
+const { details, isFetching } = useCoinDetails(() => coinUuid)
 
 function formatPrice(price: string) {
   return new Intl.NumberFormat('en-US', {
