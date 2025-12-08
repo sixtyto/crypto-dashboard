@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { useCoinDetails } from '@/composables/useCoinDetails'
+import type { CoinDetails } from '@/composables/useCoinDetails'
 
-const { coinUuid } = defineProps<{
-  coinUuid: string
+defineProps<{
+  details: CoinDetails | null
+  isFetching: boolean
+  lastUpdated: Date | null
 }>()
-
-const { details, isFetching } = useCoinDetails(() => coinUuid)
 
 function formatPrice(price: string) {
   return new Intl.NumberFormat('en-US', {
@@ -28,9 +28,22 @@ function formatCompact(value: string) {
 function isPositive(change: string) {
   return Number(change) >= 0
 }
+
+function formatTime(date: Date) {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).format(date)
+}
 </script>
 
 <template>
+  <div class="stats-header">
+    <span v-if="lastUpdated" class="last-updated">
+      Live • Last updated: {{ formatTime(lastUpdated) }}
+    </span>
+  </div>
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">
@@ -80,6 +93,37 @@ function isPositive(change: string) {
 </template>
 
 <style scoped>
+.stats-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-sm);
+}
+
+.last-updated {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.last-updated::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

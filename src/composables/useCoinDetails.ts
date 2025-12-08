@@ -24,7 +24,9 @@ export function useCoinDetails(coinUuid: MaybeRefOrGetter<string>) {
     return `https://api.coinranking.com/v2/coin/${uuid}`
   })
 
-  const { data, error, isFetching } = useFetch<CoinRankingCoinResponse>(url)
+  const { data, error, isFetching, lastUpdated } = useFetch<CoinRankingCoinResponse>(url, {
+    pollingInterval: 30000,
+  })
 
   const details = computed(() => {
     if (data.value && data.value.status === 'success') {
@@ -37,5 +39,6 @@ export function useCoinDetails(coinUuid: MaybeRefOrGetter<string>) {
     details,
     error,
     isFetching,
+    lastUpdated,
   }
 }
