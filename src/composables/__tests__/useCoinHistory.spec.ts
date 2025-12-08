@@ -7,12 +7,6 @@ vi.mock('../useFetch', () => ({
   useFetch: vi.fn(),
 }))
 
-vi.mock('../../constants/coins', () => ({
-  COIN_MAP: {
-    BTC: 'Qwsogvtv82FCd',
-  },
-}))
-
 describe('useCoinHistory', () => {
   const mockUseFetchData = ref<any>(null)
 
@@ -39,7 +33,7 @@ describe('useCoinHistory', () => {
       },
     }
 
-    const { history } = useCoinHistory('BTC', '24h')
+    const { history } = useCoinHistory('Qwsogvtv82FCd', '24h')
 
     expect(history.value).toEqual([
       { price: '200', timestamp: 2 },
@@ -49,13 +43,12 @@ describe('useCoinHistory', () => {
 
   it('should return empty array if data is invalid', () => {
     mockUseFetchData.value = { status: 'fail' }
-    const { history } = useCoinHistory('BTC', '24h')
+    const { history } = useCoinHistory('Qwsogvtv82FCd', '24h')
     expect(history.value).toEqual([])
   })
 
-  it('should not construct URL if coin is not in map', () => {
-    // @ts-expect-error Testing invalid input
-    useCoinHistory('INVALID', '24h')
+  it('should not construct URL if coin uuid is empty', () => {
+    useCoinHistory('', '24h')
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     const passedUrlRef = useFetchMock.mock.calls[0][0]

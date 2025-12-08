@@ -1,54 +1,73 @@
 <script lang="ts" setup>
-import type { CoinSymbol } from '@/constants/coins'
-import { COIN_OPTIONS } from '@/constants/coins'
+import type { Coin } from '@/composables/useCoins'
+import { computed } from 'vue'
+import BaseCombobox from './BaseCombobox.vue'
 
-const model = defineModel<CoinSymbol>()
+const props = defineProps<{
+  coins: Coin[]
+}>()
+
+const model = defineModel<string>()
+
+const selectedCoin = computed({
+  get: () => props.coins.find(c => c.symbol === model.value),
+  set: (val) => {
+    if (val) {
+      model.value = val.symbol
+    }
+  },
+})
+
+function filterCoin(coin: Coin, query: string) {
+  return coin.name.toLowerCase().includes(query)
+    || coin.symbol.toLowerCase().includes(query)
+}
 </script>
 
 <template>
-  <div class="select-wrapper">
-    <select v-model="model">
-      <option
-        v-for="option in COIN_OPTIONS"
-        :key="option.value"
-        :value="option.value"
-      >
-        {{ option.label }}
-      </option>
-    </select>
+  <div class="selector-wrapper">
+    <BaseCombobox
+      v-model="selectedCoin"
+      :options="coins"
+      :filter-function="filterCoin"
+      placeholder="Select Coin"
+    >
+      <template #selected="{ option }">
+        <img :src="option.iconUrl" class="coin-icon" alt="">
+        {{ option.name }} ({{ option.symbol }})
+      </template>
+
+      <template #option="{ option }">
+        <img :src="option.iconUrl" class="coin-icon" alt="">
+        <span class="coin-name">{{ option.name }}</span>
+        <span class="coin-symbol">{{ option.symbol }}</span>
+      </template>
+    </BaseCombobox>
   </div>
 </template>
 
 <style scoped>
-.select-wrapper {
-  position: relative;
-  width: 200px;
+.selector-wrapper {
+  width: 250px;
 }
 
-select {
-  appearance: none;
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  padding-right: 2.5rem;
-  width: 100%;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
+.coin-icon {
+  width: 20px;
+  height: 20px;
 }
 
-select:focus {
-  outline: none;
-  border-color: var(--color-accent-primary);
-  box-shadow: 0 0 0 2px var(--color-accent-glow);
+.coin-name {
+  flex: 1;
+}
+
+.coin-symbol {
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
 }
 
 @media (max-width: 640px) {
-  .select-wrapper {
+  .selector-wrapper {
     width: 100%;
-    max-width: 100%;
   }
 }
 </style>

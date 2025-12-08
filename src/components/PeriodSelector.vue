@@ -38,6 +38,7 @@ select {
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
+  height: 100%;
 }
 
 select:focus {

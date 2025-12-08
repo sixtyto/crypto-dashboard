@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { CoinSymbol } from '../constants/coins'
+import { computed } from 'vue'
 import CoinSelector from '../components/CoinSelector.vue'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
@@ -7,13 +7,23 @@ import HoldingsCalculator from '../components/HoldingsCalculator.vue'
 import PeriodSelector from '../components/PeriodSelector.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import { useCoinDetails } from '../composables/useCoinDetails'
+import { useCoins } from '../composables/useCoins'
 import { useQueryParameter } from '../composables/useQueryParameter'
 import { PERIOD_OPTIONS } from '../constants/periods'
 
-const coin = useQueryParameter<CoinSymbol>('coin', 'BTC')
+const coinSymbol = useQueryParameter<string>('coin', 'BTC')
 const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
 
-const { details, isFetching, lastUpdated } = useCoinDetails(() => coin.value)
+const { coins, isFetching: isFetchingCoins } = useCoins()
+
+const selectedCoin = computed(() => {
+  return coins.value.find(c => c.symbol === coinSymbol.value)
+})
+
+const selectedCoinUuid = computed(() => selectedCoin.value?.uuid || '')
+const selectedCoinName = computed(() => selectedCoin.value?.name || coinSymbol.value)
+
+const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(selectedCoinUuid)
 </script>
 
 <template>
@@ -34,27 +44,40 @@ const { details, isFetching, lastUpdated } = useCoinDetails(() => coin.value)
       </header>
 
       <div class="selectors-wrapper">
-        <CoinSelector v-model="coin" />
+        <CoinSelector
+          v-if="!isFetchingCoins"
+          v-model="coinSymbol"
+          :coins="coins"
+        />
+        <div v-else class="loading-selector">
+          Loading coins...
+        </div>
 
         <PeriodSelector v-model="period" />
       </div>
 
-      <CryptoStats
-        :details="details"
-        :is-fetching="isFetching"
-        :last-updated="lastUpdated"
-      />
+      <template v-if="selectedCoinUuid">
+        <CryptoStats
+          :details="details"
+          :is-fetching="isFetchingDetails"
+          :last-updated="lastUpdated"
+        />
 
-      <HoldingsCalculator
-        :current-price="details?.price"
-        :coin-symbol="coin"
-        :is-fetching="isFetching"
-      />
+        <HoldingsCalculator
+          :coin-symbol="coinSymbol"
+          :current-price="details?.price"
+          :is-fetching="isFetchingDetails"
+        />
 
-      <CryptoChart
-        :coin="coin"
-        :period="period"
-      />
+        <CryptoChart
+          :coin-name="selectedCoinName"
+          :coin-uuid="selectedCoinUuid"
+          :period="period"
+        />
+      </template>
+      <div v-else-if="!isFetchingCoins" class="error-message">
+        Coin not found.
+      </div>
     </div>
   </div>
 </template>
@@ -118,6 +141,18 @@ const { details, isFetching, lastUpdated } = useCoinDetails(() => coin.value)
   text-align: center;
   margin-top: 1rem;
   color: var(--color-accent-primary);
+}
+
+.loading-selector {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+
+.error-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 640px) {

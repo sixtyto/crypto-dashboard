@@ -7,13 +7,6 @@ vi.mock('../useFetch', () => ({
   useFetch: vi.fn(),
 }))
 
-vi.mock('../../constants/coins', () => ({
-  COIN_MAP: {
-    BTC: 'Qwsogvtv82FCd',
-    ETH: 'razxDUgYGNAdQ',
-  },
-}))
-
 describe('useCoinDetails', () => {
   const mockUseFetchData = ref<any>(null)
   const mockUseFetchError = ref<any>(null)
@@ -46,7 +39,7 @@ describe('useCoinDetails', () => {
       },
     }
 
-    const { details } = useCoinDetails('BTC')
+    const { details } = useCoinDetails('Qwsogvtv82FCd')
 
     expect(details.value).toEqual({
       'price': '50000',
@@ -60,12 +53,12 @@ describe('useCoinDetails', () => {
     mockUseFetchData.value = {
       status: 'fail',
     }
-    const { details } = useCoinDetails('BTC')
+    const { details } = useCoinDetails('Qwsogvtv82FCd')
     expect(details.value).toBeNull()
   })
 
   it('should construct the correct URL', () => {
-    useCoinDetails('ETH')
+    useCoinDetails('razxDUgYGNAdQ')
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     expect(useFetchMock).toHaveBeenCalled()
@@ -73,9 +66,8 @@ describe('useCoinDetails', () => {
     expect(passedUrlRef.value).toContain('razxDUgYGNAdQ')
   })
 
-  it('should not construct URL if coin is not in map', () => {
-    // @ts-expect-error Testing invalid input
-    useCoinDetails('INVALID')
+  it('should not construct URL if coin uuid is empty', () => {
+    useCoinDetails('')
 
     const useFetchMock = vi.mocked(useFetchModule.useFetch)
     const passedUrlRef = useFetchMock.mock.calls[0][0]

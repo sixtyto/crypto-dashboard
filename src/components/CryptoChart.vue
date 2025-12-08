@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { CoinSymbol } from '@/constants/coins'
 import {
   CategoryScale,
   Chart,
@@ -16,12 +15,13 @@ import { useCoinHistory } from '../composables/useCoinHistory'
 import { useTheme } from '../composables/useTheme'
 import { getStyle } from '../utils/getStyle'
 
-const { coin, period } = defineProps<{
-  coin: CoinSymbol
+const { coinName, coinUuid, period } = defineProps<{
+  coinName: string
+  coinUuid: string
   period: string
 }>()
 
-const { history, isFetching } = useCoinHistory(() => coin, () => period)
+const { history, isFetching } = useCoinHistory(() => coinUuid, () => period)
 
 Chart.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, Filler)
 
@@ -67,7 +67,7 @@ function renderChart() {
       labels,
       datasets: [
         {
-          label: `${coin} Price`,
+          label: `${coinName} Price`,
           data: dataPoints,
           borderColor: accentColor,
           backgroundColor: gradient,
