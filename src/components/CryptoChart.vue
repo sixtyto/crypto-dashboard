@@ -11,7 +11,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js'
-import { markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { markRaw, nextTick, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useCoinHistory } from '../composables/useCoinHistory'
 import { useTheme } from '../composables/useTheme'
 import { getStyle } from '../utils/getStyle'
