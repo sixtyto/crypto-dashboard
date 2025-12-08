@@ -25,7 +25,9 @@ export function useCoinHistory(coin: MaybeRefOrGetter<CoinSymbol>, period: Maybe
     return `https://api.coinranking.com/v2/coin/${uuid.value}/history?timePeriod=${toValue(period)}`
   })
 
-  const { data, error, isFetching } = useFetch<CoinRankingResponse>(url)
+  const { data, error, isFetching, lastUpdated } = useFetch<CoinRankingResponse>(url, {
+    pollingInterval: 30000,
+  })
 
   const history = computed(() => {
     if (data.value && data.value.status === 'success') {
@@ -38,5 +40,6 @@ export function useCoinHistory(coin: MaybeRefOrGetter<CoinSymbol>, period: Maybe
     history,
     error,
     isFetching,
+    lastUpdated,
   }
 }
