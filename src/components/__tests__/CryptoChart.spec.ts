@@ -9,15 +9,16 @@ const mockDataTrigger = ref(0)
 
 // Mock Chart.js
 vi.mock('chart.js', () => {
-  const MockChart = vi.fn(() => {
+  function MockChart() {
     return {
       destroy: vi.fn(),
     }
-  })
-  ;(MockChart as any).register = vi.fn()
+  }
+  const ChartSpy = vi.fn(MockChart)
+  ;(ChartSpy as any).register = vi.fn()
 
   return {
-    Chart: MockChart,
+    Chart: ChartSpy,
     CategoryScale: vi.fn(),
     LinearScale: vi.fn(),
     PointElement: vi.fn(),
@@ -62,6 +63,7 @@ describe('cryptoChart.vue', () => {
           history: computed(() => {
             const _ = mockDataTrigger.value
             return [
+              { timestamp: 1000, price: '100' },
               { timestamp: 2000, price: '110' }, // +10%
             ]
           }),
