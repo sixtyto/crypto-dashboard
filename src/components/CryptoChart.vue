@@ -10,24 +10,37 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js'
-import { markRaw, nextTick, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useCoinHistory } from '../composables/useCoinHistory'
 import { useTheme } from '../composables/useTheme'
 import { getStyle } from '../utils/getStyle'
 
-const { coinName, coinUuid, period } = defineProps<{
+const props = defineProps<{
   coinName: string
   coinUuid: string
   period: string
+  comparisonCoinName?: string
+  comparisonCoinUuid?: string
 }>()
 
-const { history, isFetching } = useCoinHistory(() => coinUuid, () => period)
+const { history: primaryHistory, isFetching: isPrimaryFetching } = useCoinHistory(() => props.coinUuid, () => props.period)
+const { history: secondaryHistory, isFetching: isSecondaryFetching } = useCoinHistory(() => props.comparisonCoinUuid || '', () => props.period)
+
+const isFetching = computed(() => isPrimaryFetching.value || (!!props.comparisonCoinUuid && isSecondaryFetching.value))
 
 Chart.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, Filler)
 
 const { theme } = useTheme()
 const chartInstance = shallowRef<Chart | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
+
+function normalizeData(data: { price: string }[]) {
+  const firstPoint = data[0]
+  if (!firstPoint)
+    return []
+  const startPrice = Number.parseFloat(firstPoint.price)
+  return data.map(p => ((Number.parseFloat(p.price) - startPrice) / startPrice) * 100)
+}
 
 function renderChart() {
   if (!canvas.value)
@@ -42,7 +55,9 @@ function renderChart() {
     chartInstance.value = null
   }
 
+  const hasComparison = secondaryHistory.value.length > 0
   const accentColor = getStyle('--color-accent-primary')
+  const comparisonColor = getStyle('--color-text-primary')
   const accentGlow = getStyle('--color-accent-glow')
   const textColor = getStyle('--color-text-secondary')
   const borderColor = getStyle('--color-border')
@@ -51,37 +66,66 @@ function renderChart() {
   gradient.addColorStop(0, accentGlow)
   gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
 
-  const labels = history.value.map((p) => {
+  const labels = primaryHistory.value.map((p) => {
     const date = new Date(p.timestamp * 1000)
-    if (period === '24h') {
+    if (props.period === '24h') {
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
     }
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   })
 
-  const dataPoints = history.value.map(p => Number.parseFloat(p.price))
+  let primaryData: number[]
+  let secondaryData: number[] = []
+
+  if (hasComparison) {
+    primaryData = normalizeData(primaryHistory.value)
+    secondaryData = normalizeData(secondaryHistory.value)
+  }
+  else {
+    primaryData = primaryHistory.value.map(p => Number.parseFloat(p.price))
+  }
+
+  const datasets = [
+    {
+      label: props.coinName,
+      data: primaryData,
+      borderColor: accentColor,
+      backgroundColor: hasComparison ? 'transparent' : gradient,
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 6,
+      pointBackgroundColor: accentColor,
+      pointHoverBackgroundColor: accentColor,
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 2,
+      fill: !hasComparison,
+      tension: 0.4,
+    },
+  ]
+
+  if (hasComparison) {
+    datasets.push({
+      label: props.comparisonCoinName || 'Comparison',
+      data: secondaryData,
+      borderColor: comparisonColor,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 6,
+      pointBackgroundColor: comparisonColor,
+      pointHoverBackgroundColor: comparisonColor,
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 2,
+      fill: false,
+      tension: 0.4,
+    })
+  }
 
   chartInstance.value = markRaw(new Chart(canvas.value, {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        {
-          label: `${coinName} Price`,
-          data: dataPoints,
-          borderColor: accentColor,
-          backgroundColor: gradient,
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 6,
-          pointBackgroundColor: accentColor,
-          pointHoverBackgroundColor: accentColor,
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2,
-          fill: true,
-          tension: 0.4,
-        },
-      ],
+      datasets,
     },
     options: {
       responsive: true,
@@ -92,7 +136,10 @@ function renderChart() {
       },
       plugins: {
         legend: {
-          display: false,
+          display: hasComparison,
+          labels: {
+            color: textColor,
+          },
         },
         tooltip: {
           backgroundColor: getStyle('--color-bg-secondary'),
@@ -101,7 +148,7 @@ function renderChart() {
           borderColor,
           borderWidth: 1,
           padding: 10,
-          displayColors: false,
+          displayColors: true,
           callbacks: {
             label: (context) => {
               let label = context.dataset.label || ''
@@ -109,7 +156,12 @@ function renderChart() {
                 label += ': '
               }
               if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y)
+                if (hasComparison) {
+                  label += `${context.parsed.y.toFixed(2)}%`
+                }
+                else {
+                  label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y)
+                }
               }
               return label
             },
@@ -137,6 +189,9 @@ function renderChart() {
           ticks: {
             color: textColor,
             callback: (value) => {
+              if (hasComparison) {
+                return `${Number(value).toFixed(2)}%`
+              }
               return `$${Number(value).toLocaleString()}`
             },
           },
@@ -150,7 +205,7 @@ function renderChart() {
   }))
 }
 
-watch([theme, history], () => nextTick(() => renderChart()))
+watch([theme, primaryHistory, secondaryHistory], () => nextTick(() => renderChart()))
 
 watch(isFetching, (newValue) => {
   if (!newValue) {
@@ -163,6 +218,10 @@ onUnmounted(() => {
     chartInstance.value.destroy()
     chartInstance.value = null
   }
+})
+
+onMounted(() => {
+  renderChart()
 })
 </script>
 

@@ -172,4 +172,62 @@ describe('useFetch', () => {
     // Should not fetch again
     expect(mockFetch).toHaveBeenCalledTimes(1)
   })
+
+  it('should reset data when url becomes empty', async () => {
+    const mockData = { id: 1 }
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => mockData,
+    })
+
+    const url = ref('https://api.example.com/data')
+    const { data } = useFetch(url)
+
+    await vi.runAllTimersAsync()
+    expect(data.value).toEqual(mockData)
+
+    url.value = ''
+    await nextTick()
+
+    expect(data.value).toBeNull()
+  })
+
+  it('should ignore stale responses if url changes', async () => {
+    const url = ref('https://api.example.com/1')
+
+    // Create a delayed promise for the first request
+    let resolveFirst: (value: any) => void
+    const firstReq = new Promise((resolve) => {
+      resolveFirst = resolve
+    })
+
+    mockFetch
+      .mockReturnValueOnce(firstReq)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 2 }),
+      })
+
+    const { data } = useFetch(url)
+
+    // Trigger first fetch
+    await vi.advanceTimersByTimeAsync(0)
+
+    // Change URL immediately
+    url.value = 'https://api.example.com/2'
+    await vi.advanceTimersByTimeAsync(0) // Trigger second fetch
+
+    // Now resolve the first request (which should be stale)
+    resolveFirst!({
+      ok: true,
+      json: async () => ({ id: 1 }),
+    })
+
+    // Wait for everything
+    await vi.runAllTimersAsync()
+
+    // Data should be from the second request (id: 2), not the first (id: 1)
+    // The first request (id: 1) finished LAST, but should be ignored.
+    expect(data.value).toEqual({ id: 2 })
+  })
 })

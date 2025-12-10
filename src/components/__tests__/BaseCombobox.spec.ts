@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import BaseCombobox from '../BaseCombobox.vue'
 
-describe('BaseCombobox.vue', () => {
+describe('baseCombobox.vue', () => {
   const options = [
     { id: 1, label: 'Option 1' },
     { id: 2, label: 'Option 2' },
