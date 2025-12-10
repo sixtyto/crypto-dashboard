@@ -15,6 +15,8 @@ export function useFetch<T>(url: MaybeRefOrGetter<string>, options: UseFetchOpti
     const urlValue = toValue(url)
 
     if (!urlValue) {
+      data.value = null
+      error.value = null
       return
     }
 
@@ -24,6 +26,10 @@ export function useFetch<T>(url: MaybeRefOrGetter<string>, options: UseFetchOpti
     for (let i = 0; i < 4; i++) {
       try {
         const response = await fetch(urlValue)
+
+        if (toValue(url) !== urlValue)
+          return
+
         if (!response.ok) {
           const json = await response.json().catch(() => null)
           throw new Error(json?.message || `Error: ${response.status} ${response.statusText}`)
@@ -34,13 +40,17 @@ export function useFetch<T>(url: MaybeRefOrGetter<string>, options: UseFetchOpti
         break
       }
       catch (err) {
+        if (toValue(url) !== urlValue)
+          return
+
         error.value = err
         if (i < 3)
           await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
 
-    isFetching.value = false
+    if (toValue(url) === urlValue)
+      isFetching.value = false
   }
 
   let intervalId: ReturnType<typeof setInterval> | null = null

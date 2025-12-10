@@ -12,6 +12,7 @@ import { useQueryParameter } from '../composables/useQueryParameter'
 import { PERIOD_OPTIONS } from '../constants/periods'
 
 const coinSymbol = useQueryParameter<string>('coin', 'BTC')
+const comparisonCoinSymbol = useQueryParameter<string>('compare', '')
 const period = useQueryParameter('period', '7d', (val: string) => PERIOD_OPTIONS.some(o => o.value === val))
 
 const { coins, isFetching: isFetchingCoins } = useCoins()
@@ -20,8 +21,27 @@ const selectedCoin = computed(() => {
   return coins.value.find(c => c.symbol === coinSymbol.value)
 })
 
+const comparisonCoin = computed(() => {
+  if (!comparisonCoinSymbol.value)
+    return undefined
+  return coins.value.find(c => c.symbol === comparisonCoinSymbol.value)
+})
+
+const isComparing = computed({
+  get: () => !!comparisonCoinSymbol.value,
+  set: (val) => {
+    if (!val)
+      comparisonCoinSymbol.value = ''
+    else if (!comparisonCoinSymbol.value)
+      comparisonCoinSymbol.value = 'ETH'
+  },
+})
+
 const selectedCoinUuid = computed(() => selectedCoin.value?.uuid || '')
 const selectedCoinName = computed(() => selectedCoin.value?.name || coinSymbol.value)
+
+const comparisonCoinUuid = computed(() => comparisonCoin.value?.uuid || '')
+const comparisonCoinName = computed(() => comparisonCoin.value?.name || comparisonCoinSymbol.value)
 
 const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(selectedCoinUuid)
 </script>
@@ -53,6 +73,22 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
           Loading coins...
         </div>
 
+        <div class="compare-toggle">
+          <label class="compare-label">
+            <input
+              v-model="isComparing"
+              type="checkbox"
+            >
+            Compare
+          </label>
+        </div>
+
+        <CoinSelector
+          v-if="isComparing && !isFetchingCoins"
+          v-model="comparisonCoinSymbol"
+          :coins="coins"
+        />
+
         <PeriodSelector v-model="period" />
       </div>
 
@@ -72,6 +108,8 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
         <CryptoChart
           :coin-name="selectedCoinName"
           :coin-uuid="selectedCoinUuid"
+          :comparison-coin-name="comparisonCoinName"
+          :comparison-coin-uuid="comparisonCoinUuid"
           :period="period"
         />
       </template>
@@ -132,9 +170,26 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
 .selectors-wrapper {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: var(--spacing-md);
   margin: 0 auto var(--spacing-lg);
-  max-width: 600px;
+  max-width: 800px;
+}
+
+.compare-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.compare-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
 }
 
 .loading-indicator {
@@ -188,7 +243,13 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
 
   .selectors-wrapper {
     flex-direction: column;
+    align-items: stretch;
     gap: var(--spacing-sm);
+  }
+
+  .compare-toggle {
+    justify-content: center;
+    padding: 0.5rem 0;
   }
 }
 </style>
