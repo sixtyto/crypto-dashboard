@@ -5,6 +5,7 @@ import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
 import HoldingsCalculator from '../components/HoldingsCalculator.vue'
 import PeriodSelector from '../components/PeriodSelector.vue'
+import PortfolioSummary from '../components/PortfolioSummary.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import { useCoinDetails } from '../composables/useCoinDetails'
 import { useCoins } from '../composables/useCoins'
@@ -103,6 +104,11 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
           :coin-symbol="coinSymbol"
           :current-price="details?.price"
           :is-fetching="isFetchingDetails"
+        />
+
+        <PortfolioSummary
+          v-if="!isFetchingCoins"
+          :coins="coins"
         />
 
         <CryptoChart
