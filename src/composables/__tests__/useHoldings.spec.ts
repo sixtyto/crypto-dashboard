@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useHoldings } from '../useHoldings'
+import { resetHoldingsState, useHoldings } from '../useHoldings'
 
 describe('useHoldings', () => {
   beforeEach(() => {
     localStorage.clear()
+    resetHoldingsState()
   })
 
   it('updates holdings and localStorage', () => {

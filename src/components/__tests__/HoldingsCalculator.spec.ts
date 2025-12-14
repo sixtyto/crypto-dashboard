@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { resetHoldingsState } from '@/composables/useHoldings'
 import HoldingsCalculator from '../HoldingsCalculator.vue'
 
 describe('holdingsCalculator', () => {
@@ -11,6 +12,7 @@ describe('holdingsCalculator', () => {
 
   beforeEach(() => {
     localStorage.clear()
+    resetHoldingsState()
     vi.clearAllMocks()
   })
 

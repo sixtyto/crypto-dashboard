@@ -49,3 +49,8 @@ export function useHoldings() {
     updateHolding,
   }
 }
+
+export function resetHoldingsState() {
+  holdings.value = {}
+  initialized = false
+}
