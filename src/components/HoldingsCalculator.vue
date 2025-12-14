@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { CoinSymbol } from '@/constants/coins'
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
+import { useHoldings } from '@/composables/useHoldings'
 
 const props = defineProps<{
   currentPrice: string | undefined
@@ -8,27 +9,15 @@ const props = defineProps<{
   isFetching: boolean
 }>()
 
-const amount = ref<number | null>(null)
+const { holdings, updateHolding } = useHoldings()
 
-watch(() => props.coinSymbol, (newSymbol) => {
-  const saved = localStorage.getItem(`crypto-holdings-${newSymbol}`)
-  if (saved) {
-    const parsed = Number.parseFloat(saved)
-    if (!Number.isNaN(parsed)) {
-      amount.value = parsed
-      return
-    }
-  }
-  amount.value = null
-}, { immediate: true })
-
-watch(amount, (newAmount) => {
-  if (newAmount !== null && newAmount !== undefined && newAmount !== 0) {
-    localStorage.setItem(`crypto-holdings-${props.coinSymbol}`, newAmount.toString())
-  }
-  else {
-    localStorage.removeItem(`crypto-holdings-${props.coinSymbol}`)
-  }
+const amount = computed({
+  get: () => {
+    return holdings.value[props.coinSymbol] || null
+  },
+  set: (val: number | null) => {
+    updateHolding(props.coinSymbol, val)
+  },
 })
 
 const totalValue = computed(() => {
@@ -133,7 +122,7 @@ label {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  height: 38px; /* Match input height roughly */
+  height: 38px;
   display: flex;
   align-items: center;
 }
