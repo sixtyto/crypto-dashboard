@@ -1,15 +1,18 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import CoinSelector from '../components/CoinSelector.vue'
 import CryptoChart from '../components/CryptoChart.vue'
 import CryptoStats from '../components/CryptoStats.vue'
 import HoldingsCalculator from '../components/HoldingsCalculator.vue'
 import PeriodSelector from '../components/PeriodSelector.vue'
 import PortfolioSummary from '../components/PortfolioSummary.vue'
+import PriceAlerts from '../components/PriceAlerts.vue'
+import RecentViews from '../components/RecentViews.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import { useCoinDetails } from '../composables/useCoinDetails'
 import { useCoins } from '../composables/useCoins'
 import { useQueryParameter } from '../composables/useQueryParameter'
+import { useRecentViews } from '../composables/useRecentViews'
 import { PERIOD_OPTIONS } from '../constants/periods'
 
 const coinSymbol = useQueryParameter<string>('coin', 'BTC')
@@ -45,6 +48,13 @@ const comparisonCoinUuid = computed(() => comparisonCoin.value?.uuid || '')
 const comparisonCoinName = computed(() => comparisonCoin.value?.name || comparisonCoinSymbol.value)
 
 const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(selectedCoinUuid)
+const { addRecentView } = useRecentViews()
+
+watch(coinSymbol, (newSymbol) => {
+  if (newSymbol) {
+    addRecentView(newSymbol)
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -93,6 +103,12 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
         <PeriodSelector v-model="period" />
       </div>
 
+      <RecentViews
+        v-if="!isFetchingCoins"
+        v-model="coinSymbol"
+        :coins="coins"
+      />
+
       <template v-if="selectedCoinUuid">
         <CryptoStats
           :details="details"
@@ -104,6 +120,12 @@ const { details, isFetching: isFetchingDetails, lastUpdated } = useCoinDetails(s
           :coin-symbol="coinSymbol"
           :current-price="details?.price"
           :is-fetching="isFetchingDetails"
+        />
+
+        <PriceAlerts
+          :coin-symbol="coinSymbol"
+          :current-price="details?.price"
+          :coins="coins"
         />
 
         <PortfolioSummary
