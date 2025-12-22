@@ -39,7 +39,7 @@ export function usePriceAlerts() {
 
   function addAlert(coinSymbol: string, targetPrice: number, condition: 'above' | 'below') {
     const newAlert: PriceAlert = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       coinSymbol,
       targetPrice,
       condition,

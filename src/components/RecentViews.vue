@@ -14,8 +14,12 @@ const emit = defineEmits<{
 
 const { recentViews } = useRecentViews()
 
+const coinsMap = computed(() => {
+  return new Map(props.coins.map(c => [c.symbol, c]))
+})
+
 const recentCoins = computed(() => {
-  return recentViews.value.map(symbol => props.coins.find(c => c.symbol === symbol)).filter(Boolean) as Coin[]
+  return recentViews.value.map(symbol => coinsMap.value.get(symbol)).filter(Boolean) as Coin[]
 })
 
 function selectCoin(symbol: string) {

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Coin } from '@/composables/useCoins'
+import type { PriceAlert } from '@/composables/usePriceAlerts'
 import { computed, ref } from 'vue'
 import { usePriceAlerts } from '@/composables/usePriceAlerts'
 
@@ -34,7 +35,7 @@ function formatCurrency(value: number) {
   }).format(value)
 }
 
-function isTriggered(alert: any) {
+function isTriggered(alert: PriceAlert) {
   if (!props.currentPrice)
     return false
   const price = Number(props.currentPrice)

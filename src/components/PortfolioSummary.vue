@@ -13,9 +13,15 @@ const props = defineProps<{
 const { holdings } = useHoldings()
 const { theme } = useTheme()
 
+const FALLBACK_COLORS = ['#F7931A', '#627EEA', '#26A17B', '#2775CA', '#F3BA2F', '#00A67E', '#D1C4E9', '#FFAB91']
+
+const coinsMap = computed(() => {
+  return new Map(props.coins.map(c => [c.symbol, c]))
+})
+
 const portfolioAssets = computed(() => {
   return Object.entries(holdings.value).map(([symbol, amount]) => {
-    const coin = props.coins.find(c => c.symbol === symbol)
+    const coin = coinsMap.value.get(symbol)
     const price = coin ? Number(coin.price) : 0
     const value = amount * price
     return {
@@ -63,11 +69,6 @@ function renderChart() {
   if (!ctx)
     return
 
-  if (chartInstance.value) {
-    chartInstance.value.destroy()
-    chartInstance.value = null
-  }
-
   const textColor = getStyle('--color-text-secondary')
   const bgSecondary = getStyle('--color-bg-secondary')
   const textPrimary = getStyle('--color-text-primary')
@@ -78,10 +79,28 @@ function renderChart() {
   const backgroundColors = portfolioAssets.value.map((a, i) => {
     if (a.color)
       return a.color
-    // Fallback colors if no coin color is available
-    const fallbackColors = ['#F7931A', '#627EEA', '#26A17B', '#2775CA', '#F3BA2F', '#00A67E', '#D1C4E9', '#FFAB91']
-    return fallbackColors[i % fallbackColors.length]
+    return FALLBACK_COLORS[i % FALLBACK_COLORS.length]
   })
+
+  if (chartInstance.value) {
+    chartInstance.value.data.labels = labels
+    chartInstance.value.data.datasets[0].data = data
+    chartInstance.value.data.datasets[0].backgroundColor = backgroundColors
+    chartInstance.value.data.datasets[0].borderColor = bgSecondary
+
+    if (chartInstance.value.options.plugins?.legend?.labels) {
+       chartInstance.value.options.plugins.legend.labels.color = textColor
+    }
+     if (chartInstance.value.options.plugins?.tooltip) {
+       chartInstance.value.options.plugins.tooltip.backgroundColor = bgSecondary
+       chartInstance.value.options.plugins.tooltip.titleColor = textPrimary
+       chartInstance.value.options.plugins.tooltip.bodyColor = textColor
+       chartInstance.value.options.plugins.tooltip.borderColor = borderColor
+    }
+
+    chartInstance.value.update()
+    return
+  }
 
   chartInstance.value = markRaw(new Chart(canvas.value, {
     type: 'pie',
