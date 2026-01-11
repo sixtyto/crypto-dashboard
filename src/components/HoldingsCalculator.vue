@@ -12,11 +12,16 @@ const props = defineProps<{
 const { holdings, updateHolding } = useHoldings()
 
 const amount = computed({
-  get: () => {
-    return holdings.value[props.coinSymbol] || null
-  },
+  get: () => holdings.value[props.coinSymbol]?.amount || null,
   set: (val: number | null) => {
     updateHolding(props.coinSymbol, val)
+  },
+})
+
+const buyPrice = computed({
+  get: () => holdings.value[props.coinSymbol]?.buyPrice || null,
+  set: (val: number | null) => {
+    updateHolding(props.coinSymbol, amount.value, val)
   },
 })
 
@@ -27,6 +32,27 @@ const totalValue = computed(() => {
   return amount.value * price
 })
 
+const profit = computed(() => {
+  if (!amount.value || !buyPrice.value || !props.currentPrice)
+    return null
+  const currentVal = totalValue.value
+  const costBasis = amount.value * buyPrice.value
+  return currentVal - costBasis
+})
+
+const profitPercentage = computed(() => {
+  if (!buyPrice.value || !props.currentPrice)
+    return null
+  const currentPrice = Number(props.currentPrice)
+  return ((currentPrice - buyPrice.value) / buyPrice.value) * 100
+})
+
+function useCurrentPrice() {
+  if (props.currentPrice) {
+    buyPrice.value = Number(props.currentPrice)
+  }
+}
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -34,6 +60,10 @@ function formatCurrency(value: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value)
+}
+
+function formatPercent(value: number) {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
 }
 </script>
 
@@ -44,24 +74,59 @@ function formatCurrency(value: number) {
     </div>
 
     <div class="calculator-content">
-      <div class="input-group">
-        <label :for="`amount-input-${coinSymbol}`">Amount Owned ({{ coinSymbol }})</label>
-        <input
-          :id="`amount-input-${coinSymbol}`"
-          v-model="amount"
-          type="number"
-          min="0"
-          step="any"
-          placeholder="0.00"
-          class="amount-input"
-        >
+      <div class="input-row">
+        <div class="input-group">
+          <label :for="`amount-input-${coinSymbol}`">Amount Owned ({{ coinSymbol }})</label>
+          <input
+            :id="`amount-input-${coinSymbol}`"
+            v-model="amount"
+            type="number"
+            min="0"
+            step="any"
+            placeholder="0.00"
+            class="styled-input"
+          >
+        </div>
+
+        <div class="input-group">
+          <label :for="`buy-price-input-${coinSymbol}`">Avg. Buy Price (USD)</label>
+          <div class="input-with-action">
+            <input
+              :id="`buy-price-input-${coinSymbol}`"
+              v-model="buyPrice"
+              type="number"
+              min="0"
+              step="any"
+              placeholder="0.00"
+              class="styled-input"
+            >
+            <button
+              v-if="currentPrice"
+              class="action-button"
+              title="Use current price"
+              @click="useCurrentPrice"
+            >
+              Current
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div class="result-group">
-        <label>Total Value</label>
-        <div class="value">
-          <span v-if="isFetching && amount !== null" class="skeleton" style="width: 100px" />
-          <span v-else>{{ formatCurrency(totalValue) }}</span>
+      <div class="results-row">
+        <div class="result-group">
+          <label>Total Value</label>
+          <div class="value">
+            <span v-if="isFetching && amount !== null" class="skeleton" style="width: 100px" />
+            <span v-else>{{ formatCurrency(totalValue) }}</span>
+          </div>
+        </div>
+
+        <div v-if="profit !== null" class="result-group">
+          <label>Profit / Loss</label>
+          <div class="value" :class="profit >= 0 ? 'text-green' : 'text-red'">
+            {{ formatCurrency(profit) }}
+            <span class="percentage">({{ formatPercent(profitPercentage || 0) }})</span>
+          </div>
         </div>
       </div>
     </div>
@@ -85,9 +150,14 @@ function formatCurrency(value: number) {
 
 .calculator-content {
   display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.input-row, .results-row {
+  display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-lg);
-  align-items: flex-end;
 }
 
 .input-group, .result-group {
@@ -103,7 +173,7 @@ label {
   color: var(--color-text-secondary);
 }
 
-.amount-input {
+.styled-input {
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   color: var(--color-text-primary);
@@ -113,9 +183,31 @@ label {
   width: 100%;
 }
 
-.amount-input:focus {
+.styled-input:focus {
   outline: none;
   border-color: var(--color-accent-primary);
+}
+
+.input-with-action {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.action-button {
+  background: var(--color-accent-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.action-button:hover {
+  opacity: 0.9;
 }
 
 .value {
@@ -125,6 +217,20 @@ label {
   height: 38px;
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.percentage {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.text-green {
+  color: #10b981;
+}
+
+.text-red {
+  color: #ef4444;
 }
 
 .skeleton {
