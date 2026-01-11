@@ -19,7 +19,7 @@ const amount = computed({
 })
 
 const buyPrice = computed({
-  get: () => holdings.value[props.coinSymbol]?.buyPrice || null,
+get: () => holdings.value[props.coinSymbol]?.buyPrice ?? null,
   set: (val: number | null) => {
     updateHolding(props.coinSymbol, amount.value, val)
   },
