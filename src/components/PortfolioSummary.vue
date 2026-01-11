@@ -15,7 +15,7 @@ const portfolioAssets = computed(() => {
     const currentPrice = coin ? Number(coin.price) : 0
     const currentValue = holding.amount * currentPrice
     const costBasis = holding.buyPrice ? holding.amount * holding.buyPrice : 0
-    const profit = holding.buyPrice ? currentValue - costBasis : null
+const profit = holding.buyPrice !== null ? currentValue - costBasis : null
     const profitPercentage = (holding.buyPrice && holding.buyPrice > 0)
       ? ((currentPrice - holding.buyPrice) / holding.buyPrice) * 100
       : null
