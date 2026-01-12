@@ -33,7 +33,7 @@ const totalValue = computed(() => {
 })
 
 const profit = computed(() => {
-  if (!amount.value || !buyPrice.value || !props.currentPrice)
+if (amount.value === null || buyPrice.value === null || !props.currentPrice)
     return null
   const currentVal = totalValue.value
   const costBasis = amount.value * buyPrice.value
