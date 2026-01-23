@@ -47,7 +47,7 @@ const profitPercentage = computed(() => {
   return ((currentPrice - buyPrice.value) / buyPrice.value) * 100
 })
 
-function useCurrentPrice() {
+function setCurrentPrice() {
   if (props.currentPrice) {
     buyPrice.value = Number(props.currentPrice)
   }
